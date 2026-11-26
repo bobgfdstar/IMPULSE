@@ -115,7 +115,7 @@ localization = {
         aimAutoStopStrength = "Сила автостопа (%)",
         espBoxes = "Включить боксы", currentBoxType = "Тип боксов",
         espTextSize = "Размер текста", boxCornerSize = "Размер уголков",
-        arrowESP = "Стрелки у прицела", arrowDistance = "Дистанция",
+       
         arrowSize = "Размер", arrowGlowSize = "Размер свечения", arrowGlowStrength = "Сила свечения",
         espNames = "Показывать ники", espHpText = "Полоска здоровья",
         espDistance = "Показывать дистанцию",
@@ -195,7 +195,7 @@ localization = {
         aimAutoStopStrength = "Auto-Stop Strength (%)",
         espBoxes = "Enable Boxes", currentBoxType = "Box Type",
         espTextSize = "Text Size", boxCornerSize = "Corner Size",
-        arrowESP = "Crosshair Arrows", arrowDistance = "Distance",
+       
         arrowSize = "Size", arrowGlowSize = "Glow Size", arrowGlowStrength = "Glow Strength",
         espNames = "Show Names", espHpText = "Health Bar",
         espDistance = "Show Distance",
@@ -282,7 +282,6 @@ _G.aimAutoStopStrength = 100
 _G.espColor = Color3.fromRGB(0, 255, 100)
 _G.espTextSize = 11
 _G.boxCornerSize = 25
-_G.arrowESPEnabled = false
 _G.arrowDistance = 90
 _G.arrowSize = 12
 _G.arrowGlowSize = 6
@@ -2242,37 +2241,9 @@ createAdvancedToggle(espContent, "viewDirection", "viewDirection", 8, function(s
 end)
 createInnerToggle(espContent, "weaponEsp", "weaponEsp", 9)
 createInnerSlider(espContent, "espTextSize", 8, 24, "espTextSize", 10)
-createAdvancedToggle(espContent, "arrowESP", "arrowESPEnabled", 11, function(sub)
-    createInnerSlider(sub, "arrowDistance", 40, 300, "arrowDistance", 1)
-    createInnerSlider(sub, "arrowSize", 6, 30, "arrowSize", 2)
-    createInnerSlider(sub, "arrowGlowSize", 0, 20, "arrowGlowSize", 3)
-    createInnerSlider(sub, "arrowGlowStrength", 0, 100, "arrowGlowStrength", 4)
-end)
 
 -- WORLD Content
 createInnerToggle(worldContent, "fullbrightEnabled", "fullbrightEnabled", 1)
-createAdvancedToggle(worldContent, "debugCamEnabled", "debugCamEnabled", 2, function(sub)
-    createInnerSlider(sub, "debugCamSpeed", 1, 50, "debugCamSpeed", 1)
-    createInnerSlider(sub, "debugCamSensitivity", 10, 100, "debugCamSensitivity", 2, function(val)
-        _G.debugCamSensitivity = val
-    end)
-end)
-createAdvancedToggle(worldContent, "radarEnabled", "radarEnabled", 3, function(sub)
-    createInnerSlider(sub, "radarSize", 100, 400, "radarSize", 1)
-    createInnerSlider(sub, "radarRange", 50, 500, "radarRange", 2)
-    createInnerSlider(sub, "radarDotSize", 2, 12, "radarDotSize", 3)
-    createInnerToggle(sub, "radarShowNames", "radarShowNames", 4)
-    createInnerToggle(sub, "radarShowViewDir", "radarShowViewDir", 5)
-    createInnerSlider(sub, "radarViewDirLength", 5, 40, "radarViewDirLength", 6)
-    createInnerToggle(sub, "radarFireHighlight", "radarFireHighlight", 7)
-    createInnerSlider(sub, "radarFireDuration", 1, 5, "radarFireDuration", 8)
-end)
-createInnerToggle(worldContent, "fogEnabled", "fogEnabled", 4)
-createInnerSlider(worldContent, "fogDensity", 0, 100, "fogDensity", 5)
-createInnerToggle(worldContent, "pinkSkyEnabled", "pinkSkyEnabled", 6)
-createInnerToggle(worldContent, "particlesEnabled", "particlesEnabled", 7)
-createInnerSlider(worldContent, "particleDensity", 0, 100, "particleDensity", 8)
-createInnerSlider(worldContent, "particleSize", 0, 100, "particleSize", 9)
 
 -- === ОСТАЛЬНЫЕ ВКЛАДКИ ===
 createAdvancedToggle(tabs.Combat, "antiRecoil", "antiRecoil", 1, function(sub)
@@ -4471,68 +4442,6 @@ Watermark.ZIndex = 899
 Instance.new("UICorner", Watermark).CornerRadius = UDim.new(0, 6)
 
 -- === СТРЕЛКИ ВОКРУГ ПРИЦЕЛА ===
-local arrowLabels = {}
-local arrowGlows = {}
-local arrowOffsets = {{0, -1, 180}, {1, 0, 270}, {0, 1, 0}, {-1, 0, 90}}
-for i = 1, 4 do
-    local glow = Instance.new("TextLabel", ScreenGui)
-    glow.Text = "▲"
-    glow.AnchorPoint = Vector2.new(0.5, 0.5)
-    glow.BackgroundTransparency = 1
-    glow.TextColor3 = Color3.fromRGB(80, 255, 140)
-    glow.Font = Enum.Font.GothamBold
-    glow.TextSize = 12
-    glow.Visible = false
-    glow.ZIndex = 850
-    arrowGlows[i] = glow
-
-    local lbl = Instance.new("TextLabel", ScreenGui)
-    lbl.Text = "▲"
-    lbl.AnchorPoint = Vector2.new(0.5, 0.5)
-    lbl.BackgroundTransparency = 1
-    lbl.TextColor3 = Color3.fromRGB(80, 255, 140)
-    lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 12
-    lbl.Visible = false
-    lbl.ZIndex = 851
-    local st = Instance.new("UIStroke", lbl)
-    st.Color = Color3.fromRGB(0, 0, 0)
-    st.Thickness = 1
-    st.Transparency = 0.2
-    arrowLabels[i] = lbl
-end
-
-RunService.RenderStepped:Connect(function()
-    pcall(function()
-        local on = _G.arrowESPEnabled
-        local mp = UserInputService:GetMouseLocation()
-        local d = _G.arrowDistance or 90
-        local s = _G.arrowSize or 12
-        local gs = _G.arrowGlowSize or 6
-        local gstr = math.clamp((_G.arrowGlowStrength or 50) / 100, 0, 1)
-        for i = 1, 4 do
-            local lbl = arrowLabels[i]
-            local glow = arrowGlows[i]
-            if not on then
-                lbl.Visible = false
-                glow.Visible = false
-            else
-                local o = arrowOffsets[i]
-                local x = mp.X + o[1] * d
-                local y = mp.Y + o[2] * d
-                lbl.Position = UDim2.new(0, x, 0, y)
-                lbl.Rotation = o[3]
-                lbl.TextSize = s
-                lbl.Visible = true
-                glow.Position = UDim2.new(0, x, 0, y)
-                glow.Rotation = o[3]
-                glow.TextSize = s + gs
-                glow.TextTransparency = 1 - (0.2 + gstr * 0.5)
-                glow.Visible = gs > 0
-            end
-        end
-    end)
-end)
 
 RunService.RenderStepped:Connect(function(dt)
     pcall(function()
