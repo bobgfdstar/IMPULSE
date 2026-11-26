@@ -93,8 +93,8 @@ localization = {
         killaura = "Килл-аура", movement = "Движение", other = "Другое",
         esp = "ESP", world = "МИР",
         pillMain = "АИМБОТ", pillLegit = "ЛЕГИТ", pillTrigger = "ТРИГГЕР",
-        aimbotEnabled = "Включить Аимбот", silentAimEnabled = "Silent Aim",
-        silentAimFov = "Радиус Silent Aim",
+        aimbotEnabled = "Включить Аимбот",
+        
         fovVisible = "Показывать FOV круг", fovRadius = "Радиус FOV",
         dynamicFovEnabled = "Динамический FOV (близкие)", dynamicFovStart = "Старт с дистанции (м)",
         dynamicFovMax = "Макс. увеличение (x)",
@@ -166,7 +166,6 @@ localization = {
         antiAimMenu = "Анти-Аим", antiAimWarning = "АНТИ-АИМ ВКЛЮЧЕН",
         off = "Off", back = "Назад", left = "Влево", right = "Вправо", down = "Вниз", up = "Вверх",
         hitboxTitle = "НАСТРОЙКА ХИТБОКСОВ", hitboxSub = "ЛКМ — добавить/убрать | ★ — где вес больше",
-        multipoint = "Мультипоинт",
     },
     EN = {
         title = " IMPULSE REMASTER V2",
@@ -174,8 +173,8 @@ localization = {
         killaura = "Killaura", movement = "Movement", other = "Other",
         esp = "ESP", world = "WORLD",
         pillMain = "AIMBOT", pillLegit = "LEGIT", pillTrigger = "TRIGGER",
-        aimbotEnabled = "Enable Aimbot", silentAimEnabled = "Silent Aim",
-        silentAimFov = "Silent Aim FOV",
+        aimbotEnabled = "Enable Aimbot",
+        
         fovVisible = "Show FOV Circle", fovRadius = "FOV Radius",
         dynamicFovEnabled = "Dynamic FOV (close)", dynamicFovStart = "Start Distance (m)",
         dynamicFovMax = "Max Multiplier (x)",
@@ -247,16 +246,12 @@ localization = {
         antiAimMenu = "Anti-Aim", antiAimWarning = "ANTI-AIM ENABLED",
         off = "Off", back = "Back", left = "Left", right = "Right", down = "Down", up = "Up",
         hitboxTitle = "HITBOX CONFIG", hitboxSub = "LMB — add/remove | ★ — highest weight",
-        multipoint = "Multipoint",
     }
 }
 
 -- === ГЛОБАЛЬНЫЕ КОНФИГИ ===
 _G.aimbotEnabled = false
-_G.silentAimEnabled = false
-_G.silentAimFov = 150
-_G.silentAimPart = "Head"
-_G.aimSmoothing = 8
+_G.aimSmoothing = 20
 _G.fovRadius = 150
 _G.dynamicFovEnabled = false
 _G.dynamicFovStart = 30
@@ -404,7 +399,6 @@ _G.activeHitboxZones = { Head = true, Chest = false, Waist = false, Legs = false
 -- Принудительное наведение в приоритетную зону (кнопка-стрелка у манекена).
 _G.forcePriorityAim = false
 _G.priorityAimSpeed = 100
-_G.multipoint = 0
 _G.HitboxZoneMap = {
     Head  = {"Head"},
     Chest = {"UpperTorso", "Torso"},
@@ -2047,7 +2041,6 @@ local function rebuildAimbotTab()
             createAdvancedToggle(aimbotDynamic, "aimbotEnabled", "aimbotEnabled", 1, function(sub)
                 createInnerSlider(sub, "fovRadius", 30, 500, "fovRadius", 1)
                 createInnerSlider(sub, "aimSmoothing", 0, 100, "aimSmoothing", 2)
-                createInnerToggle(sub, "silentAimEnabled", "silentAimEnabled", 3)
                 createInnerToggle(sub, "ignoreFriends", "ignoreFriends", 5)
                 createInnerToggle(sub, "ignoreBehindWalls", "ignoreBehindWalls", 6)
                 createInnerToggle(sub, "autoAimRMB", "autoAimRMB", 7)
@@ -2724,89 +2717,6 @@ resetStroke.Thickness = 1
 resetStroke.Transparency = 0.3
 table.insert(registeredLabels, {element = ResetBtn, key = "resetAll"})
 
--- === МУЛЬТИПОИНТ (РАЗБРОС ТОЧКИ ВНУТРИ ХИТБОКСА) ===
-MultipointFrame = Instance.new("Frame", SidePanel)
-MultipointFrame.Name = "MultipointFrame"
-MultipointFrame.Size = UDim2.new(1, -20, 0, 40)
-MultipointFrame.BackgroundColor3 = Theme.BgRow
-MultipointFrame.BackgroundTransparency = 0.35
-MultipointFrame.BorderSizePixel = 0
-MultipointFrame.ZIndex = 106
-Instance.new("UICorner", MultipointFrame).CornerRadius = UDim.new(0, 7)
-
-local mpLabel = Instance.new("TextLabel", MultipointFrame)
-mpLabel.Size = UDim2.new(0.6, 0, 0, 17)
-mpLabel.Position = UDim2.new(0, 10, 0, 3)
-mpLabel.BackgroundTransparency = 1
-mpLabel.Text = localization[currentLanguage].multipoint or "Мультипоинт"
-mpLabel.TextColor3 = Theme.TextMain
-mpLabel.TextSize = 12
-mpLabel.Font = Enum.Font.GothamBold
-mpLabel.TextXAlignment = Enum.TextXAlignment.Left
-mpLabel.ZIndex = 107
-
-local mpVal = Instance.new("TextLabel", MultipointFrame)
-mpVal.Size = UDim2.new(0.35, 0, 0, 17)
-mpVal.Position = UDim2.new(0.6, 0, 0, 3)
-mpVal.BackgroundTransparency = 1
-mpVal.Text = tostring(_G.multipoint or 0) .. "%"
-mpVal.TextColor3 = Theme.GreenBright
-mpVal.TextSize = 12
-mpVal.Font = Enum.Font.GothamBold
-mpVal.TextXAlignment = Enum.TextXAlignment.Right
-mpVal.ZIndex = 107
-
-local mpTrack = Instance.new("Frame", MultipointFrame)
-mpTrack.Size = UDim2.new(1, -20, 0, 6)
-mpTrack.Position = UDim2.new(0, 10, 0, 25)
-mpTrack.BackgroundColor3 = Color3.fromRGB(40, 55, 45)
-mpTrack.BorderSizePixel = 0
-mpTrack.ZIndex = 107
-Instance.new("UICorner", mpTrack).CornerRadius = UDim.new(1, 0)
-
-local mpFill = Instance.new("Frame", mpTrack)
-mpFill.Size = UDim2.new((_G.multipoint or 0) / 100, 0, 1, 0)
-mpFill.BackgroundColor3 = Theme.Green
-mpFill.ZIndex = 108
-Instance.new("UICorner", mpFill).CornerRadius = UDim.new(1, 0)
-
-local mpKnob = Instance.new("Frame", mpTrack)
-mpKnob.Size = UDim2.new(0, 11, 0, 11)
-mpKnob.AnchorPoint = Vector2.new(0.5, 0.5)
-mpKnob.Position = UDim2.new((_G.multipoint or 0) / 100, 0, 0.5, 0)
-mpKnob.BackgroundColor3 = Theme.GreenBright
-mpKnob.ZIndex = 109
-Instance.new("UICorner", mpKnob).CornerRadius = UDim.new(1, 0)
-
-local mpTrigger = Instance.new("TextButton", mpTrack)
-mpTrigger.Size = UDim2.new(1, 0, 3, 0)
-mpTrigger.Position = UDim2.new(0, 0, -1, 0)
-mpTrigger.BackgroundTransparency = 1
-mpTrigger.Text = ""
-mpTrigger.ZIndex = 110
-
-local function setMultipointFromMouse()
-    local mx = UserInputService:GetMouseLocation().X
-    local pct = math.clamp((mx - mpTrack.AbsolutePosition.X) / mpTrack.AbsoluteSize.X, 0, 1)
-    _G.multipoint = math.round(pct * 100)
-    mpVal.Text = tostring(_G.multipoint) .. "%"
-    mpFill.Size = UDim2.new(pct, 0, 1, 0)
-    mpKnob.Position = UDim2.new(pct, 0, 0.5, 0)
-end
-local mpConn, mpEnd
-mpTrigger.MouseButton1Down:Connect(function()
-    setMultipointFromMouse()
-    mpConn = UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then setMultipointFromMouse() end
-    end)
-    mpEnd = UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if mpConn then mpConn:Disconnect() end
-            if mpEnd then mpEnd:Disconnect() end
-        end
-    end)
-end)
-
 SlidersContainer = Instance.new("ScrollingFrame", SidePanel)
 SlidersContainer.Size = UDim2.new(1, -16, 0, 185)
 SlidersContainer.Position = UDim2.new(0, 8, 0, 312)
@@ -2916,9 +2826,8 @@ local function layoutHitboxPanel()
     local resetY = slidersY + rowsH + 8
     ResetBtn.Position = UDim2.new(0, 10, 0, resetY)
     local mpY = resetY + 24 + 8
-    if MultipointFrame then MultipointFrame.Position = UDim2.new(0, 10, 0, mpY) end
     local panelW = _G.forcePriorityAim and 300 or 240
-    SidePanel.Size = UDim2.new(0, panelW, 0, mpY + 40 + 8)
+    SidePanel.Size = UDim2.new(0, panelW, 0, mpY + 8)
 end
 
 
@@ -3545,31 +3454,11 @@ local function getPriorityPartFor(char)
     return nil
 end
 
--- Мультипоинт: точка внутри хитбокса со случайным смещением (не выходит за пределы).
-local mpCache = {}
-local function multipointPoint(part)
-    if not part then return Vector3.zero end
-    local mp = math.clamp((_G.multipoint or 0) / 100, 0, 1)
-    if mp <= 0 then return part.Position end
-    local c = mpCache[part]
-    if not c or c.mp ~= mp or tick() >= c.nextT then
-        local half = part.Size * 0.5 * (0.8 * mp)
-        c = {
-            mp = mp,
-            nextT = tick() + 0.35,
-            pos = part.CFrame:PointToWorldSpace(Vector3.new(
-                (math.random() * 2 - 1) * half.X,
-                (math.random() * 2 - 1) * half.Y,
-                (math.random() * 2 - 1) * half.Z
-            )),
-        }
-        mpCache[part] = c
-    end
-    return c.pos
-end
 
 -- Выбранная зона для текущей цели (держим ~0.4с, чтобы прицел не дёргался).
 local aimPickPlayer, aimPickZone, aimPickTime = nil, nil, 0
+
+local aimVisCache = {}
 
 local function getClosestPlayer()
     local myChar = LocalPlayer.Character
@@ -3605,12 +3494,19 @@ local function getClosestPlayer()
                         local dist = (Vector2.new(screenPos.X, screenPos.Y) - mouseLocation).Magnitude
                         if dist <= fovLimit then
                             
+                            -- Видимость считаем всегда (с кэшем 80 мс): цель за стеной
+                            -- получает низкий приоритет, но не исчезает из выбора.
                             local behindWall = false
-                            if _G.ignoreBehindWalls then
+                            local vc = aimVisCache[tp.part]
+                            local vnow = tick()
+                            if vc and vnow < vc.t then
+                                behindWall = vc.v
+                            else
                                 local rayDir = tp.part.Position - Camera.CFrame.Position
                                 local ray = Ray.new(Camera.CFrame.Position, rayDir.Unit * (rayDir.Magnitude + 5))
                                 local hit = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character, char})
-                                if hit then behindWall = true end
+                                behindWall = hit ~= nil
+                                aimVisCache[tp.part] = { t = vnow + 0.08, v = behindWall }
                             end
 
                             local targetLook = char:FindFirstChild("Head") and char.Head.CFrame.LookVector or char.HumanoidRootPart.CFrame.LookVector
@@ -3620,7 +3516,8 @@ local function getClosestPlayer()
                             local targetData = {player = player, part = tp.part, dist = dist, threat = threat, isVisible = not behindWall, behindWall = behindWall, zone = tp.zone}
                             
                             if behindWall then
-                                table.insert(wallTargets, targetData)
+                                -- Жёсткий фильтр «Проверка стен»: за стеной цель вообще не берём.
+                                if not _G.ignoreBehindWalls then table.insert(wallTargets, targetData) end
                             else
                                 table.insert(visibleTargets, targetData)
                             end
@@ -3713,102 +3610,11 @@ local function getClosestPlayer()
     return nil, nil
 end
 
--- ============================================================
--- SILENT AIM
--- ============================================================
-local function getSilentAimTarget()
-    local closest, shortestDist = nil, math.huge
-    local mousePos = UserInputService:GetMouseLocation()
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-            local part = plr.Character:FindFirstChild(_G.silentAimPart or "Head")
-            if hum and hum.Health > 0 and part then
-                if isPlayerIgnored(plr) or (_G.ignoreFriends and LocalPlayer:IsFriendsWith(plr.UserId)) then continue end
-                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-                if onScreen then
-                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    if dist <= _G.silentAimFov and dist < shortestDist then
-                        closest = part
-                        shortestDist = dist
-                    end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-local silentAimHooked = false
-local oldIndex, oldNamecall
-
-local function setupSilentAimHook()
-    if silentAimHooked then return end
-    pcall(function()
-        local mt = getrawmetatable(game)
-        oldIndex = mt.__index
-        oldNamecall = mt.__namecall
-        setreadonly(mt, false)
-
-        mt.__index = newcclosure(function(self, key)
-            if _G.silentAimEnabled and not checkcaller() and self == Mouse then
-                if key == "Hit" or key == "Target" then
-                    local target = getSilentAimTarget()
-                    if target then
-                        if key == "Hit" then
-                            return CFrame.new(target.Position)
-                        else
-                            return target
-                        end
-                    end
-                end
-            end
-            return oldIndex(self, key)
-        end)
-
-        setreadonly(mt, true)
-        silentAimHooked = true
-    end)
-end
-
-local function setupRaycastHook()
-    if not silentAimHooked then return end
-    pcall(function()
-        local mt = getrawmetatable(game)
-        setreadonly(mt, false)
-        mt.__namecall = newcclosure(function(self, ...)
-            local method = getnamecallmethod()
-            if _G.silentAimEnabled and not checkcaller() then
-                if method == "Raycast" and self == workspace then
-                    local target = getSilentAimTarget()
-                    if target then
-                        local args = {...}
-                        local origin = args[1]
-                        local direction = args[2]
-                        local params = args[3]
-                        local newDir = (target.Position - origin)
-                        return oldNamecall(self, origin, newDir, params)
-                    end
-                end
-            end
-            return oldNamecall(self, ...)
-        end)
-        setreadonly(mt, true)
-    end)
-end
-
-task.spawn(function()
-    while task.wait(0.5) do
-        if _G.silentAimEnabled and not silentAimHooked then
-            pcall(setupSilentAimHook)
-            pcall(setupRaycastHook)
-        end
-    end
-end)
-
 -- Переменные для удержания цели
 _G.lockedTargetPlayer = nil
 _G.lockedTargetTime = 0
+
+local hvhSnapPart, hvhSnapPick = nil, 0
 
 local function getHvhTarget()
     local myChar = LocalPlayer.Character
@@ -4174,19 +3980,16 @@ local function updateEsp()
                     highlight = Instance.new("Highlight", ChamsContainer)
                     highlight.Name = obj.Name
                     highlight.Adornee = obj
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                 end
-                if not objVisible then
-                    -- За стенками не подсвечиваем.
-                    highlight.Enabled = false
-                else
-                    local chamsColor = Color3.fromRGB(0, 255, 100)
-                    if _G.focusedPlayer == obj.Name then chamsColor = Color3.fromRGB(255, 60, 60) end
-                    highlight.FillColor = chamsColor
-                    highlight.FillTransparency = _G.chamsFillTransparency / 100
-                    highlight.OutlineColor = (_G.currentChamsStyle == "Match") and chamsColor or Color3.fromRGB(0, 255, 100)
-                    highlight.OutlineTransparency = 0
-                    highlight.Enabled = true
-                end
+                local chamsColor = Color3.fromRGB(0, 255, 100)
+                if _G.focusedPlayer == obj.Name then chamsColor = Color3.fromRGB(255, 60, 60) end
+                highlight.FillColor = chamsColor
+                highlight.FillTransparency = _G.chamsFillTransparency / 100
+                highlight.OutlineColor = (_G.currentChamsStyle == "Match") and chamsColor or Color3.fromRGB(0, 255, 100)
+                highlight.OutlineTransparency = 0
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Enabled = true
             elseif highlight then
                 highlight:Destroy()
             end
@@ -4317,7 +4120,7 @@ RunService.RenderStepped:Connect(function(dt)
                 currentAimPoint = Camera.CFrame.Position + Camera.CFrame.LookVector * 50
             end
 
-            local finalTargetPos = multipointPoint(targetPart)
+            local finalTargetPos = targetPart.Position
 
             -- Перевод прицела между хитбоксами: только когда взгляд на хитбоксе.
             -- Тогда ведёт слайдер перевода; иначе — обычное сглаживание.
@@ -4344,7 +4147,7 @@ RunService.RenderStepped:Connect(function(dt)
 
                 local pp = getPriorityPartFor(char)
                 if pp then
-                    finalTargetPos = multipointPoint(pp)
+                    finalTargetPos = pp.Position
                     if gazePart then
                         if priorityPlayer ~= target or priorityTargetPart ~= pp or priorityAnchor ~= gazePart then
                             priorityPlayer = target
@@ -4358,13 +4161,14 @@ RunService.RenderStepped:Connect(function(dt)
                         else
                             priorityProgress = math.min(1, priorityProgress + (dt or (1/60)) * (0.3 + sp * 9.7))
                         end
-                        finalTargetPos = multipointPoint(gazePart):Lerp(multipointPoint(pp), priorityProgress)
+                        finalTargetPos = gazePart.Position:Lerp(pp.Position, priorityProgress)
                         priorityActive = true
                     end
                 end
             end
             if _G.aimJitterEnabled then
-                local jitter = (_G.aimJitterStrength / 100) * 0.5
+                local amp = (_G.aimbotMode == "HVH") and 0.15 or 0.9
+                local jitter = (_G.aimJitterStrength / 100) * amp
                 finalTargetPos = finalTargetPos + Vector3.new(
                     (math.random() - 0.5) * 2 * jitter,
                     (math.random() - 0.5) * 2 * jitter,
@@ -4382,7 +4186,18 @@ RunService.RenderStepped:Connect(function(dt)
             -- Сила доводки убрана: наведение полностью задаётся «Скоростью Аима»
             -- (0 = почти снап, 100 = мягко/медленно). Jitter/Miss/FOV учтены выше.
             local raw = math.clamp(_G.aimSmoothing / 100, 0, 1)
-            local assist = math.clamp(1 - raw * 0.9, 0.01, 1)
+            local assist
+            if raw <= 0.001 then
+                -- 0 = мгновенно (снап), как в HVH
+                assist = 1
+            else
+                -- Время перевода растёт с ползунком, а не наоборот:
+                -- 1% ≈ 0.03 с (почти снап), 20% ≈ 0.3 с, 50% ≈ 1.1 с, 100% ≈ 4 с.
+                local duration = 0.02 + (raw ^ 1.6) * 4.0
+                local step = dt or (1 / 60)
+                assist = 1 - math.exp(-(step / duration) * 3)
+                assist = math.clamp(assist, 0.004, 1)
+            end
             if _G.aimAssistMode == "Доводка" then
                 local fraw = math.clamp((_G.aimFollowSmoothing or 50) / 100, 0, 1)
                 assist = math.clamp(0.25 + (1 - fraw) * 0.45, 0.2, 0.7)
@@ -4409,6 +4224,21 @@ RunService.RenderStepped:Connect(function(dt)
             lockedTargetPart = target.part
         else
             lockedTargetPart = nil
+        end
+    end
+
+    -- === HVH: МГНОВЕННЫЙ СНАП В ГОЛОВУ (приоритет камеры) ===
+    -- Внутри RenderStepped камеру иногда перезаписывает контроллер Roblox,
+    -- поэтому наведение продублировано отдельным биндингом с приоритетом камеры.
+    if _G.hvhAimbotEnabled and _G.aimbotMode == "HVH" and not (_G.debugCam and _G.debugCam.active) then
+        local hnow = tick()
+        if hnow - (hvhSnapPick or 0) > 0.08 or not hvhSnapPart or not hvhSnapPart.Parent then
+            local ht = getHvhTarget()
+            hvhSnapPart = ht and ht.part or nil
+            hvhSnapPick = hnow
+        end
+        if hvhSnapPart then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, hvhSnapPart.Position)
         end
     end
 
@@ -4474,6 +4304,20 @@ RunService.RenderStepped:Connect(function(dt)
         if LocalPlayer.Character.Humanoid.FloorMaterial ~= Enum.Material.Air then
             LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
+    end
+end)
+
+-- === HVH: камера поверх движка ===
+-- Даже если Roblox перезапишет камеру в этом кадре, биндинг с приоритетом
+-- камеры поставит взгляд на голову цели последним.
+pcall(function()
+    RunService:UnbindFromRenderStep("ImpulseHvhSnap")
+end)
+RunService:BindToRenderStep("ImpulseHvhSnap", Enum.RenderPriority.Camera.Value + 1, function()
+    if not (_G.hvhAimbotEnabled and _G.aimbotMode == "HVH") then return end
+    if _G.debugCam and _G.debugCam.active then return end
+    if hvhSnapPart and hvhSnapPart.Parent then
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, hvhSnapPart.Position)
     end
 end)
 
@@ -6375,7 +6219,7 @@ function fullUnload()
     _G.unloaded = true
 
     local killFlags = {
-        "aimbotEnabled", "silentAimEnabled", "hvhAimbotEnabled", "hvhTargetLockEnabled",
+        "aimbotEnabled", "hvhAimbotEnabled", "hvhTargetLockEnabled",
         "hvhAntiAimEnabled", "aaSpinEnabled", "aaJitterEnabled", "aaBypassEnabled",
         "aaUiYaw", "aaUiPitch", "aaUiMain", "aaDesyncEnabled",
         "triggerbotEnabled", "killauraEnabled",
