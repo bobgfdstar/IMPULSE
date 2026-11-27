@@ -32,6 +32,7 @@ currentLanguage = "RU"
 Lighting = game:GetService("Lighting")
 TweenService = game:GetService("TweenService")
 RunService = game:GetService("RunService")
+HttpService = game:GetService("HttpService")
 Players = game:GetService("Players")
 LocalPlayer = Players.LocalPlayer
 Camera = workspace.CurrentCamera
@@ -91,7 +92,7 @@ localization = {
         title = " IMPULSE REMASTER V2",
         aimbot = "Аимбот", visuals = "Визуалы", combat = "Сражение",
         killaura = "Килл-аура", movement = "Движение", other = "Другое",
-        esp = "ESP", world = "МИР",
+        esp = "ESP", world = "МИР", configs = "Конфиги",
         pillMain = "АИМБОТ", pillLegit = "ЛЕГИТ", pillTrigger = "ТРИГГЕР",
         aimbotEnabled = "Включить Аимбот",
         
@@ -102,8 +103,8 @@ localization = {
         aimSmoothingStrength = "Скорость Аима (0 = Снап)",
     aimSmoothing = "Сглаживание",
         aimTuning = "Наведение",
-        aimAssistMode = "Режим наведения", aimAssistStrength = "Сила доводки (%)",
-        aimFollowSmoothing = "Сглаживание доводки",
+       
+       
         aimJitterEnabled = "Дрожание прицела (Jitter)",
         aimJitterStrength = "Сила дрожания",
         aimMaxTurnEnabled = "Лимит поворота камеры",
@@ -151,6 +152,9 @@ localization = {
         radarShowViewDir = "Линия взгляда", radarViewDirLength = "Длина линии взгляда",
         radarFireHighlight = "Жёлтая при стрельбе", radarFireDuration = "Длительность подсветки (сек)",
         fullbrightEnabled = "Fullbright (Освещение)",
+        worldThirdPerson = "Третье лицо (камера)", worldThirdPersonDist = "Дистанция камеры",
+        skyboxEnabled = "Скайбокс", skyboxTitle = "Небо (скайбокс)",
+        skyboxDefault = "Как в игре", skyboxSpace = "Космос", skyboxSpace2 = "Космос 2", skyboxVibe = "Вайб", skyboxVibe2 = "Вайб 2", skyboxWhite = "Белое счастье", skyboxNeon = "Породный неон", skyboxNeon2 = "Усмиряюще неон", skyboxTale = "Древняя мудрость", skyboxTale2 = "Древняя мудрость 2",
         fogEnabled = "Туман", fogDensity = "Плотность тумана",
         pinkSkyEnabled = "Розовое небо", particlesEnabled = "Частицы",
         particleDensity = "Плотность частиц", particleSize = "Размер частиц",
@@ -171,7 +175,7 @@ localization = {
         title = " IMPULSE REMASTER V2",
         aimbot = "Aimbot", visuals = "Visuals", combat = "Combat",
         killaura = "Killaura", movement = "Movement", other = "Other",
-        esp = "ESP", world = "WORLD",
+        esp = "ESP", world = "WORLD", configs = "Configs",
         pillMain = "AIMBOT", pillLegit = "LEGIT", pillTrigger = "TRIGGER",
         aimbotEnabled = "Enable Aimbot",
         
@@ -182,8 +186,8 @@ localization = {
         aimSmoothingStrength = "Aim Speed (0 = Snap)",
     aimSmoothing = "Smoothing",
         aimTuning = "Aim Tuning",
-        aimAssistMode = "Aim Mode", aimAssistStrength = "Assist Strength (%)",
-        aimFollowSmoothing = "Assist Smoothing",
+       
+       
         aimJitterEnabled = "Aim Jitter",
         aimJitterStrength = "Jitter Strength",
         aimMaxTurnEnabled = "Max Turn Speed",
@@ -231,6 +235,9 @@ localization = {
         radarShowViewDir = "View Direction Line", radarViewDirLength = "View Line Length",
         radarFireHighlight = "Yellow When Shooting", radarFireDuration = "Highlight Duration (sec)",
         fullbrightEnabled = "Fullbright (Lighting)",
+        worldThirdPerson = "Third Person (Camera)", worldThirdPersonDist = "Camera Distance",
+        skyboxEnabled = "Skybox", skyboxTitle = "Sky",
+        skyboxDefault = "Default (game)", skyboxSpace = "Space", skyboxSpace2 = "Space 2", skyboxVibe = "Vibe", skyboxVibe2 = "Vibe 2", skyboxWhite = "White Bliss", skyboxNeon = "Neon", skyboxNeon2 = "Calm Neon", skyboxTale = "Ancient Wisdom", skyboxTale2 = "Ancient Wisdom 2",
         fogEnabled = "Fog", fogDensity = "Fog Density",
         pinkSkyEnabled = "Pink Sky", particlesEnabled = "Particles",
         particleDensity = "Particle Density", particleSize = "Particle Size",
@@ -265,9 +272,6 @@ _G.ignoreBehindWalls = false
 
 -- Режим наведения: "Полный" (наводит и держит на цели сам, делает всё за тебя),
 -- "Доводка" (мягко подтягивает к цели, но курсор можно двигать свободно).
-_G.aimAssistMode = "Полный"
-_G.aimFollowSmoothing = 50
-_G.aimAssistStrength = 18
 
 _G.aimJitterEnabled = true
 _G.aimJitterStrength = 15
@@ -363,6 +367,10 @@ _G.radarFireHighlight = true
 _G.radarFireDuration = 1
 
 _G.fullbrightEnabled = false
+_G.worldThirdPerson = false
+_G.worldThirdPersonDist = 12
+_G.skyboxEnabled = false
+_G.skyboxIndex = 2
 _G.fogEnabled = false
 _G.fogDensity = 50
 _G.pinkSkyEnabled = false
@@ -388,6 +396,7 @@ _G.aaJitterEnabled = false
 _G.aaJitterStrength = 30
 _G.aaJitterSpeed = 8
 _G.aaDesyncEnabled = false
+_G.aaFakeRun = false
 _G.aaDesyncStrength = 60
 _G.aaSpinEnabled = false
 _G.aaSpinSpeed = 60
@@ -1017,12 +1026,13 @@ tabs = {
     Combat = createTabFrame(),
     Killaura = createTabFrame(),
     Movement = createTabFrame(),
-    Other = createTabFrame()
+    Other = createTabFrame(),
+    Configs = createTabFrame()
 }
 
 registeredLabels = {}
 tabButtons = {}
-tabOrder = {"Aimbot", "Visuals", "Combat", "Killaura", "Movement", "Other"}
+tabOrder = {"Aimbot", "Visuals", "Combat", "Killaura", "Movement", "Other", "Configs"}
 
 menuVisible = true
 local updateHitboxPanelVisibility
@@ -1127,6 +1137,356 @@ for idx, name in ipairs(tabOrder) do
     end)
     tabButtons[name] = btn
 end
+
+-- === КОНФИГИ ===
+-- Сохранение в файлы экзекьютора: writefile / readfile / listfiles / delfile.
+-- Папка: IMPULSE/configs, формат — JSON.
+local CONFIG_DIR = "IMPULSE/configs"
+local CONFIG_KEYS = {
+    -- аимбот
+    "aimbotEnabled", "hvhAimbotEnabled", "hvhTargetLockEnabled", "fovRadius", "aimSmoothing",
+    "ignoreFriends", "ignoreBehindWalls", "autoAimRMB", "dynamicFovEnabled", "dynamicFovStart",
+    "dynamicFovMax", "aimJitterEnabled", "aimJitterStrength", "aimMissEnabled",
+    "aimMissChance", "aimMissOffset", "aimAutoStopEnabled", "aimAutoStopStrength",
+    "forcePriorityAim", "priorityAimSpeed",
+    -- анти-аим
+    "hvhAntiAimEnabled", "aaUiYaw", "aaUiPitch", "aaUiMain", "aaYaw", "aaPitch",
+    "aaSpinEnabled", "aaSpinSpeed", "aaJitterEnabled", "aaJitterSpeed", "aaJitterStrength",
+    "aaBypassEnabled", "aaDesyncEnabled", "aaFakeRun", "aaPitchDir",
+    -- бой и движение
+    "triggerbotEnabled", "killauraEnabled", "antiRecoil", "invisibleEnabled",
+    "SpeedHackEnabled", "SpeedValue", "autoStrafeEnabled", "autoStrafeStrength",
+    "wallPassEnabled", "infJumpEnabled", "bhopEnabled", "spiderEnabled", "noFallDamage",
+    "antiAfkEnabled", "tpMouseEnabled",
+    -- визуалы
+    "espBoxes", "espNames", "espHpText", "espDistance", "espSkeletons", "espChams",
+    "espTracers", "viewDirection", "weaponEsp", "espTextSize", "fullbrightEnabled",
+    "worldThirdPerson", "worldThirdPersonDist", "skyboxEnabled", "skyboxIndex",
+    "chamsFillTransparency", "currentChamsStyle", "espColor",
+}
+
+local configStatusLabel
+local configListFrame
+
+-- JSON через HttpService, а если он недоступен — свой простой формат.
+local function cfgJsonEncode(data)
+    if HttpService then
+        local ok, res = pcall(function() return HttpService:JSONEncode(data) end)
+        if ok and type(res) == "string" then return res end
+    end
+    local parts = {}
+    for k, v in pairs(data) do
+        local tv = type(v)
+        local val
+        if tv == "number" then
+            val = tostring(v)
+        elseif tv == "boolean" then
+            val = tostring(v)
+        elseif tv == "string" then
+            val = '"' .. v:gsub('[%c"\\]', function(c)
+                local map = {['"'] = '\\"', ['\\'] = '\\\\', ['\n'] = '\\n', ['\r'] = '\\r', ['\t'] = '\\t'}
+                return map[c] or ""
+            end) .. '"'
+        end
+        if val then parts[#parts + 1] = '"' .. tostring(k) .. '":' .. val end
+    end
+    return "{" .. table.concat(parts, ",") .. "}"
+end
+
+local function cfgJsonDecode(raw)
+    if HttpService then
+        local ok, res = pcall(function() return HttpService:JSONDecode(raw) end)
+        if ok and type(res) == "table" then return res end
+    end
+    local out = {}
+    for key, value in tostring(raw):gmatch('"([%w_]+)"%s*:%s*([^,}]+)') do
+        local v = value:gsub("^%s+", ""):gsub("%s+$", "")
+        if v == "true" then
+            out[key] = true
+        elseif v == "false" then
+            out[key] = false
+        elseif v:sub(1, 1) == '"' then
+            out[key] = v:sub(2, -2):gsub('\\"', '"')
+        else
+            out[key] = tonumber(v)
+        end
+    end
+    return out
+end
+
+local function cfgCall(fn, ...)
+    local ok, res = pcall(fn, ...)
+    if ok then return res end
+    return nil
+end
+
+local function cfgEnsure()
+    if type(makefolder) ~= "function" then return false end
+    -- Некоторые экзекьюторы не создают вложенные папки одной командой.
+    cfgCall(makefolder, "IMPULSE")
+    cfgCall(makefolder, CONFIG_DIR)
+    return true
+end
+
+local function cfgFiles()
+    local out = {}
+    if type(listfiles) ~= "function" then return out end
+    local files = cfgCall(listfiles, CONFIG_DIR) or {}
+    for _, path in ipairs(files) do
+        local name = tostring(path):match("([^/\\]+)%.json$")
+        if name then table.insert(out, name) end
+    end
+    table.sort(out)
+    return out
+end
+
+local function cfgPath(name)
+    return CONFIG_DIR .. "/" .. name .. ".json"
+end
+
+local function cfgSave(name)
+    if type(writefile) ~= "function" then return false, "экзекьютор не умеет writefile" end
+    if not cfgEnsure() then return false, "нет доступа к файлам" end
+    local data = {}
+    for _, key in ipairs(CONFIG_KEYS) do
+        local v = _G[key]
+        local tv = type(v)
+        if tv == "boolean" or tv == "number" or tv == "string" then data[key] = v end
+    end
+    data.__weightHead = _G.AimbotWeights and _G.AimbotWeights.Head
+    data.__weightChest = _G.AimbotWeights and _G.AimbotWeights.Chest
+    data.__weightWaist = _G.AimbotWeights and _G.AimbotWeights.Waist
+    data.__weightLegs = _G.AimbotWeights and _G.AimbotWeights.Legs
+    local encoded = cfgJsonEncode(data)
+    if type(encoded) ~= "string" or encoded == "" then return false, "не удалось собрать JSON" end
+    local path = cfgPath(name)
+    local okWrite, res = pcall(writefile, path, encoded)
+    if not okWrite then return false, "запись не удалась" end
+    -- Часть экзекьюторов ничего не возвращает, поэтому считаем nil успехом
+    -- и проверяем файл через isfile, если такая функция есть.
+    if type(isfile) == "function" then
+        if cfgCall(isfile, path) == false then return false, "файл не создался" end
+    elseif res == false then
+        return false, "запись не удалась"
+    end
+    return true
+end
+
+local function cfgLoad(name)
+    if type(readfile) ~= "function" then return false, "экзекьютор не умеет readfile" end
+    local raw = cfgCall(readfile, cfgPath(name))
+    if not raw then return false, "файл не найден" end
+    local data = cfgJsonDecode(raw)
+    if type(data) ~= "table" or next(data) == nil then return false, "файл повреждён" end
+    for key, v in pairs(data) do
+        if key:sub(1, 8) ~= "__weight" and _G[key] ~= nil and type(_G[key]) == type(v) then
+            _G[key] = v
+        end
+    end
+    if _G.AimbotWeights then
+        _G.AimbotWeights.Head = data.__weightHead or _G.AimbotWeights.Head
+        _G.AimbotWeights.Chest = data.__weightChest or _G.AimbotWeights.Chest
+        _G.AimbotWeights.Waist = data.__weightWaist or _G.AimbotWeights.Waist
+        _G.AimbotWeights.Legs = data.__weightLegs or _G.AimbotWeights.Legs
+    end
+    -- Обновляем тумблеры, чтобы интерфейс совпал с загруженным конфигом.
+    if setToggleVisual then
+        for _, key in ipairs(CONFIG_KEYS) do
+            if type(_G[key]) == "boolean" then cfgCall(setToggleVisual, key, _G[key]) end
+        end
+    end
+    -- Ползунки тоже должны встать на загруженные значения.
+    if refreshSliderVisual then
+        for _, key in ipairs(CONFIG_KEYS) do
+            if type(_G[key]) == "number" then cfgCall(refreshSliderVisual, key) end
+        end
+    end
+    return true
+end
+
+local function cfgDelete(name)
+    if type(delfile) ~= "function" then return false, "экзекьютор не умеет delfile" end
+    cfgCall(delfile, cfgPath(name))
+    return true
+end
+
+local function cfgMakeButton(parent, text, order, primary)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(1, -16, 0, 30)
+    btn.LayoutOrder = order
+    btn.BackgroundColor3 = primary and Theme.Green or Theme.BgRow
+    btn.Text = text
+    btn.TextColor3 = primary and Color3.fromRGB(10, 16, 11) or Theme.TextMain
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.AutoButtonColor = false
+    btn.ZIndex = 3
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 7)
+    if attachFeel then cfgCall(attachFeel, btn) end
+    return btn
+end
+
+local configNameBox
+local function cfgRefresh()
+    if not configListFrame then return end
+    for _, ch in ipairs(configListFrame:GetChildren()) do
+        if ch:IsA("TextButton") or ch:IsA("Frame") then ch:Destroy() end
+    end
+    local files = cfgFiles()
+    if #files == 0 then
+        local empty = Instance.new("TextLabel", configListFrame)
+        empty.Size = UDim2.new(1, -16, 0, 26)
+        empty.BackgroundTransparency = 1
+        empty.Text = "Конфигов пока нет"
+        empty.TextColor3 = Theme.TextDim
+        empty.TextSize = 11
+        empty.Font = Enum.Font.Gotham
+        return
+    end
+    for idx, name in ipairs(files) do
+        local row = Instance.new("Frame", configListFrame)
+        row.Size = UDim2.new(1, -16, 0, 30)
+        row.LayoutOrder = idx
+        row.BackgroundColor3 = Theme.BgRow
+        row.BackgroundTransparency = 0.35
+        row.BorderSizePixel = 0
+        Instance.new("UICorner", row).CornerRadius = UDim.new(0, 7)
+
+        local label = Instance.new("TextLabel", row)
+        label.Size = UDim2.new(1, -110, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = name
+        label.TextColor3 = Theme.TextMain
+        label.TextSize = 12
+        label.Font = Enum.Font.GothamSemibold
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.TextTruncate = Enum.TextTruncate.AtEnd
+
+        local loadBtn = Instance.new("TextButton", row)
+        loadBtn.Size = UDim2.new(0, 52, 0, 22)
+        loadBtn.Position = UDim2.new(1, -102, 0.5, -11)
+        loadBtn.BackgroundColor3 = Theme.Green
+        loadBtn.Text = "Взять"
+        loadBtn.TextColor3 = Color3.fromRGB(10, 16, 11)
+        loadBtn.TextSize = 11
+        loadBtn.Font = Enum.Font.GothamBold
+        loadBtn.AutoButtonColor = false
+        Instance.new("UICorner", loadBtn).CornerRadius = UDim.new(0, 6)
+
+        local delBtn = Instance.new("TextButton", row)
+        delBtn.Size = UDim2.new(0, 36, 0, 22)
+        delBtn.Position = UDim2.new(1, -44, 0.5, -11)
+        delBtn.BackgroundColor3 = Color3.fromRGB(70, 20, 20)
+        delBtn.Text = "×"
+        delBtn.TextColor3 = Color3.fromRGB(255, 140, 140)
+        delBtn.TextSize = 13
+        delBtn.Font = Enum.Font.GothamBold
+        delBtn.AutoButtonColor = false
+        Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
+
+        loadBtn.MouseButton1Click:Connect(function()
+            if PlayClick then cfgCall(PlayClick) end
+            local ok, err = cfgLoad(name)
+            if configStatusLabel then
+                configStatusLabel.Text = ok and ("Загружено: " .. name) or ("Ошибка: " .. tostring(err))
+                configStatusLabel.TextColor3 = ok and Theme.GreenBright or Color3.fromRGB(255, 120, 120)
+            end
+        end)
+        delBtn.MouseButton1Click:Connect(function()
+            if PlayClick then cfgCall(PlayClick) end
+            cfgDelete(name)
+            cfgRefresh()
+            if configStatusLabel then
+                configStatusLabel.Text = "Удалено: " .. name
+                configStatusLabel.TextColor3 = Theme.TextDim
+            end
+        end)
+        configListFrame.CanvasSize = UDim2.new(0, 0, 0, #files * 36)
+    end
+end
+
+local function buildConfigTab()
+    local tab = tabs.Configs
+    if not tab then return end
+    local header = Instance.new("Frame", tab)
+    header.Size = UDim2.new(1, -16, 0, 30)
+    header.LayoutOrder = 0
+    header.BackgroundTransparency = 1
+    local hText = Instance.new("TextLabel", header)
+    hText.Size = UDim2.new(1, 0, 1, 0)
+    hText.BackgroundTransparency = 1
+    hText.Text = "Конфиги меню"
+    hText.TextColor3 = Theme.TextMain
+    hText.TextSize = 13
+    hText.Font = Enum.Font.GothamBold
+    hText.TextXAlignment = Enum.TextXAlignment.Left
+
+    configNameBox = Instance.new("TextBox", tab)
+    configNameBox.Size = UDim2.new(1, -16, 0, 30)
+    configNameBox.LayoutOrder = 1
+    configNameBox.BackgroundColor3 = Theme.BgRow
+    configNameBox.Text = "мой конфиг"
+    configNameBox.PlaceholderText = "Название конфига"
+    configNameBox.TextColor3 = Theme.TextMain
+    configNameBox.PlaceholderColor3 = Theme.TextDim
+    configNameBox.TextSize = 12
+    configNameBox.Font = Enum.Font.Gotham
+    configNameBox.ClearTextOnFocus = false
+    configNameBox.ZIndex = 3
+    Instance.new("UICorner", configNameBox).CornerRadius = UDim.new(0, 7)
+
+    local saveBtn = cfgMakeButton(tab, "Сохранить конфиг", 2, true)
+    local refreshBtn = cfgMakeButton(tab, "Обновить список", 3, false)
+
+    configStatusLabel = Instance.new("TextLabel", tab)
+    configStatusLabel.Size = UDim2.new(1, -16, 0, 18)
+    configStatusLabel.LayoutOrder = 4
+    configStatusLabel.BackgroundTransparency = 1
+    configStatusLabel.Text = ""
+    configStatusLabel.TextColor3 = Theme.TextDim
+    configStatusLabel.TextSize = 11
+    configStatusLabel.Font = Enum.Font.Gotham
+    configStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    configListFrame = Instance.new("ScrollingFrame", tab)
+    configListFrame.Size = UDim2.new(1, -16, 0, 210)
+    configListFrame.LayoutOrder = 5
+    configListFrame.BackgroundTransparency = 1
+    configListFrame.BorderSizePixel = 0
+    configListFrame.ScrollBarThickness = 2
+    configListFrame.ScrollBarImageColor3 = Theme.Green
+    configListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    local listLayout = Instance.new("UIListLayout", configListFrame)
+    listLayout.Padding = UDim.new(0, 6)
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    saveBtn.MouseButton1Click:Connect(function()
+        if PlayClick then cfgCall(PlayClick) end
+        local name = (configNameBox.Text or ""):gsub("^%s+", ""):gsub("%s+$", "")
+        if name == "" then name = "config" end
+        name = name:gsub("[\\/:*?\"<>|]", "_")
+        local ok, err = cfgSave(name)
+        if configStatusLabel then
+            configStatusLabel.Text = ok and ("Сохранено: " .. name) or ("Ошибка: " .. tostring(err))
+            configStatusLabel.TextColor3 = ok and Theme.GreenBright or Color3.fromRGB(255, 120, 120)
+        end
+        if ok then cfgRefresh() end
+    end)
+
+    refreshBtn.MouseButton1Click:Connect(function()
+        if PlayClick then cfgCall(PlayClick) end
+        cfgRefresh()
+        if configStatusLabel then
+            configStatusLabel.Text = ("Файлы: " .. CONFIG_DIR)
+            configStatusLabel.TextColor3 = Theme.TextDim
+        end
+    end)
+
+    cfgRefresh()
+end
+
+cfgCall(buildConfigTab)
 
 -- === ПАНЕЛЬ АНИМАЦИЙ (справа, как у манекена) ===
 function buildAnimPanel()
@@ -2049,8 +2409,6 @@ local function rebuildAimbotTab()
             end)
         elseif currentPillIndex == 2 then
             createAdvancedToggle(aimbotDynamic, "aimTuning", "aimbotEnabled", 1, function(sub)
-                createInnerDropdown(sub, "aimAssistMode", {"Полный", "Доводка"}, "aimAssistMode", 0)
-                createInnerSlider(sub, "aimFollowSmoothing", 0, 100, "aimFollowSmoothing", 1)
                 createInnerToggle(sub, "aimJitterEnabled", "aimJitterEnabled", 2)
                 createInnerSlider(sub, "aimJitterStrength", 1, 100, "aimJitterStrength", 3)
                 createInnerToggle(sub, "aimMaxTurnEnabled", "aimMaxTurnEnabled", 4)
@@ -2108,6 +2466,7 @@ local function rebuildAimbotTab()
                     createInnerSlider(subSub, "aaJitterStrength", 1, 90, "aaJitterStrength", 5)
                     createInnerToggle(subSub, "aaBypass", "aaBypassEnabled", 6)
                 end)
+                createInnerToggle(sub, "aaFakeRun", "aaFakeRun", 4)
             end)
         end
     end
@@ -2190,6 +2549,408 @@ espLayout = Instance.new("UIListLayout", espContent)
 espLayout.Padding = UDim.new(0, 6)
 espLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+-- === СКАЙБОКС ===
+-- Шесть текстур неба (Sky). Формат ссылок как в рабочем небе: asset/?id=...
+-- Исходные текстуры, звёзды и светила запоминаются и возвращаются при выключении.
+-- Короткие имена свойств Sky: SkyboxBack/Front/... не существуют, из-за этого
+-- записывалась только верхняя грань (SkyboxUp), остальные вызовы молча падали.
+local SKYBOX_FACES = { "SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp" }
+local SKYBOX_PRESETS = {
+    { labelKey = "skyboxDefault" },
+    { labelKey = "skyboxSpace", starCount = 3000, celestial = true, faces = {
+        SkyboxBk  = "rbxassetid://14543264135",
+        SkyboxDn  = "rbxassetid://14543358958",
+        SkyboxFt = "rbxassetid://14543257810",
+        SkyboxLf  = "rbxassetid://14543275895",
+        SkyboxRt = "rbxassetid://14543280890",
+        SkyboxUp    = "rbxassetid://14543371676",
+    } },
+    { labelKey = "skyboxSpace2", starCount = 0, celestial = true, faces = {
+        SkyboxBk = "rbxassetid://166574023",
+        SkyboxDn = "rbxassetid://166574122",
+        SkyboxFt = "rbxassetid://166574061",
+        SkyboxLf = "rbxassetid://166574084",
+        SkyboxRt = "rbxassetid://166574092",
+        SkyboxUp = "rbxassetid://166574066",
+    } },
+    { labelKey = "skyboxVibe", starCount = 3000, celestial = false, faces = {
+        SkyboxBk = "rbxassetid://8991308822",
+        SkyboxDn = "rbxassetid://8991308505",
+        SkyboxFt = "rbxassetid://8991308320",
+        SkyboxLf = "rbxassetid://8991308038",
+        SkyboxRt = "rbxassetid://8991307660",
+        SkyboxUp = "rbxassetid://8991307329",
+    } },
+    { labelKey = "skyboxVibe2", starCount = 3000, celestial = true, faces = {
+        SkyboxBk = "rbxassetid://11555017034",
+        SkyboxDn = "rbxassetid://11555013415",
+        SkyboxFt = "rbxassetid://11555010145",
+        SkyboxLf = "rbxassetid://11555006545",
+        SkyboxRt = "rbxassetid://11555000712",
+        SkyboxUp = "rbxassetid://11554996247",
+    } },
+    { labelKey = "skyboxWhite", starCount = 3000, celestial = false, faces = {
+        SkyboxBk = "rbxassetid://155657655",
+        SkyboxDn = "rbxassetid://155674246",
+        SkyboxFt = "rbxassetid://155657609",
+        SkyboxLf = "rbxassetid://155657671",
+        SkyboxRt = "rbxassetid://155657619",
+        SkyboxUp = "rbxassetid://155674931",
+    } },
+    { labelKey = "skyboxNeon", starCount = 3000, celestial = false, faces = {
+        SkyboxBk = "rbxassetid://16739288043",
+        SkyboxDn = "rbxassetid://16739289858",
+        SkyboxFt = "rbxassetid://16739291971",
+        SkyboxLf = "rbxassetid://16739293487",
+        SkyboxRt = "rbxassetid://16739295035",
+        SkyboxUp = "rbxassetid://16739296788",
+    } },
+    { labelKey = "skyboxNeon2", starCount = 3000, celestial = false, faces = {
+        SkyboxBk = "rbxassetid://16642371727",
+        SkyboxDn = "rbxassetid://16642373510",
+        SkyboxFt = "rbxassetid://16642374596",
+        SkyboxLf = "rbxassetid://16642375956",
+        SkyboxRt = "rbxassetid://16642377351",
+        SkyboxUp = "rbxassetid://16642379025",
+    } },
+    { labelKey = "skyboxTale", starCount = 3000, celestial = true,
+      sunAngular = 0, moonAngular = 0, faces = {
+        SkyboxBk = "rbxassetid://116125630991600",
+        SkyboxDn = "rbxassetid://129095827049856",
+        SkyboxFt = "rbxassetid://102861865671030",
+        SkyboxLf = "rbxassetid://101856865035667",
+        SkyboxRt = "rbxassetid://91813273790778",
+        SkyboxUp = "rbxassetid://72828282060364",
+    } },
+    { labelKey = "skyboxTale2", starCount = 3000, celestial = true,
+      sunAngular = 0, moonAngular = 0, faces = {
+        SkyboxBk = "rbxassetid://11430898903188",
+        SkyboxDn = "rbxassetid://125503357666535",
+        SkyboxFt = "rbxassetid://13573855050668",
+        SkyboxLf = "rbxassetid://88201165269205",
+        SkyboxRt = "rbxassetid://112992927355564",
+        SkyboxUp = "rbxassetid://125384519749099",
+    } },
+}
+
+local skyboxSaved = nil
+local skyboxSavedFor = nil
+local skyboxOwned = nil
+
+local function skyboxSave(sky)
+    if skyboxSavedFor == sky then return end
+    skyboxSavedFor = sky
+    skyboxSaved = { faces = {} }
+    for _, face in ipairs(SKYBOX_FACES) do
+        local ok, value = pcall(function() return sky[face] end)
+        skyboxSaved.faces[face] = ok and value or ""
+    end
+    local okStars, stars = pcall(function() return sky.StarCount end)
+    skyboxSaved.starCount = okStars and stars or nil
+    local okCel, cel = pcall(function() return sky.CelestialBodiesShown end)
+    skyboxSaved.celestial = okCel and cel or nil
+    local okSun, sunTex = pcall(function() return sky.SunTextureId end)
+    skyboxSaved.sunTexture = okSun and sunTex or nil
+    local okMoon, moonTex = pcall(function() return sky.MoonTextureId end)
+    skyboxSaved.moonTexture = okMoon and moonTex or nil
+    local okSunAng, sunAng = pcall(function() return sky.SunAngularSize end)
+    skyboxSaved.sunAngular = okSunAng and sunAng or nil
+    local okMoonAng, moonAng = pcall(function() return sky.MoonAngularSize end)
+    skyboxSaved.moonAngular = okMoonAng and moonAng or nil
+
+    -- Атмосфера места перекрывает небо плотной дымкой: из-за неё текстуры
+    -- выглядят как ровный цвет. Пока небо наше, гасим её и запоминаем значения.
+    skyboxSaved.atmosphere = nil
+    for _, child in ipairs(Lighting:GetChildren()) do
+        if child:IsA("Atmosphere") then
+            skyboxSaved.atmosphere = {
+                obj = child,
+                density = child.Density,
+                haze = child.Haze,
+                offset = child.Offset,
+            }
+            break
+        end
+    end
+end
+
+local function skyboxRestore(sky)
+    if not skyboxSaved then return end
+    for face, value in pairs(skyboxSaved.faces or {}) do
+        pcall(function() sky[face] = value end)
+    end
+    if skyboxSaved.starCount then
+        pcall(function() sky.StarCount = skyboxSaved.starCount end)
+    end
+    if skyboxSaved.celestial ~= nil then
+        pcall(function() sky.CelestialBodiesShown = skyboxSaved.celestial end)
+    end
+    if skyboxSaved.sunTexture then
+        pcall(function() sky.SunTextureId = skyboxSaved.sunTexture end)
+    end
+    if skyboxSaved.moonTexture then
+        pcall(function() sky.MoonTextureId = skyboxSaved.moonTexture end)
+    end
+    if skyboxSaved.sunAngular then
+        pcall(function() sky.SunAngularSize = skyboxSaved.sunAngular end)
+    end
+    if skyboxSaved.moonAngular then
+        pcall(function() sky.MoonAngularSize = skyboxSaved.moonAngular end)
+    end
+    local atm = skyboxSaved.atmosphere
+    if atm and atm.obj and atm.obj.Parent then
+        pcall(function()
+            atm.obj.Density = atm.density
+            atm.obj.Haze = atm.haze
+            atm.obj.Offset = atm.offset
+        end)
+    end
+end
+
+local function skyboxApply(forceDefault)
+    local index = 1
+    if not forceDefault then
+        index = math.clamp(tonumber(_G.skyboxIndex) or 1, 1, #SKYBOX_PRESETS)
+    end
+    local preset = SKYBOX_PRESETS[index]
+    local sky = Lighting:FindFirstChildOfClass("Sky")
+
+    if not preset.faces then
+        if not sky then
+            skyboxSaved, skyboxSavedFor = nil, nil
+            return
+        end
+        if skyboxOwned and sky == skyboxOwned then
+            skyboxOwned:Destroy()
+            skyboxOwned = nil
+            skyboxSaved, skyboxSavedFor = nil, nil
+            return
+        end
+        skyboxRestore(sky)
+        return
+    end
+
+    if not sky then
+        sky = Instance.new("Sky")
+        sky.Name = "ImpulseSkybox"
+        sky.Parent = Lighting
+        skyboxOwned = sky
+    end
+
+    skyboxSave(sky)
+
+    for face, id in pairs(preset.faces) do
+        sky[face] = id
+    end
+    if preset.starCount then
+        sky.StarCount = preset.starCount
+    end
+    if preset.celestial ~= nil then
+        sky.CelestialBodiesShown = preset.celestial
+    end
+    if preset.sunTexture then
+        pcall(function() sky.SunTextureId = preset.sunTexture end)
+    end
+    if preset.moonTexture then
+        pcall(function() sky.MoonTextureId = preset.moonTexture end)
+    end
+    if preset.sunAngular then
+        pcall(function() sky.SunAngularSize = preset.sunAngular end)
+    end
+    if preset.moonAngular then
+        pcall(function() sky.MoonAngularSize = preset.moonAngular end)
+    end
+
+    if skyboxSaved.atmosphere then
+        local atm = skyboxSaved.atmosphere.obj
+        atm.Density = 0
+        atm.Haze = 0
+        atm.Offset = 0
+    end
+end
+
+-- Выпадающий список неба: плавно раскрывается, пункты проявляются по очереди.
+local function createSkyboxDropdown(parent, order)
+    local wrapper = Instance.new("Frame", parent)
+    wrapper.Name = "SkyboxDropdown"
+    wrapper.Size = UDim2.new(1, -16, 0, 46)
+    wrapper.BackgroundColor3 = Theme.BgRow
+    wrapper.LayoutOrder = order
+    wrapper.ZIndex = 3
+    wrapper.ClipsDescendants = true
+    Instance.new("UICorner", wrapper).CornerRadius = UDim.new(0, 8)
+    local stroke = Instance.new("UIStroke", wrapper)
+    stroke.Color = Theme.Border
+    stroke.Thickness = 1
+    stroke.Transparency = 0.55
+    attachFeel(wrapper)
+
+    local header = Instance.new("TextButton", wrapper)
+    header.Size = UDim2.new(1, 0, 0, 46)
+    header.BackgroundTransparency = 1
+    header.Text = ""
+    header.AutoButtonColor = false
+    header.ZIndex = 4
+
+    local caption = Instance.new("TextLabel", header)
+    caption.Size = UDim2.new(1, -64, 0, 12)
+    caption.Position = UDim2.new(0, 12, 0, 8)
+    caption.BackgroundTransparency = 1
+    caption.Text = localization[currentLanguage].skyboxTitle or "Небо"
+    caption.TextColor3 = Theme.TextDim
+    caption.TextSize = 9
+    caption.Font = Enum.Font.Gotham
+    caption.TextXAlignment = Enum.TextXAlignment.Left
+    caption.ZIndex = 5
+    table.insert(registeredLabels, {element = caption, key = "skyboxTitle"})
+
+    local value = Instance.new("TextLabel", header)
+    value.Size = UDim2.new(1, -64, 0, 18)
+    value.Position = UDim2.new(0, 12, 0, 22)
+    value.BackgroundTransparency = 1
+    value.Text = ""
+    value.TextColor3 = Theme.TextMain
+    value.TextSize = 13
+    value.Font = Enum.Font.GothamSemibold
+    value.TextXAlignment = Enum.TextXAlignment.Left
+    value.TextTruncate = Enum.TextTruncate.AtEnd
+    value.ZIndex = 5
+
+    local chevron = Instance.new("TextLabel", header)
+    chevron.Size = UDim2.new(0, 18, 0, 18)
+    chevron.AnchorPoint = Vector2.new(1, 0.5)
+    chevron.Position = UDim2.new(1, -12, 0.5, 0)
+    chevron.BackgroundTransparency = 1
+    chevron.Text = "►"
+    chevron.TextColor3 = Theme.Green
+    chevron.TextSize = 15
+    chevron.Font = Enum.Font.GothamBold
+    chevron.ZIndex = 5
+
+    local list = Instance.new("ScrollingFrame", wrapper)
+    list.Size = UDim2.new(1, -16, 0, 0)
+    list.Position = UDim2.new(0, 8, 0, 46)
+    list.BackgroundColor3 = Theme.BgDark
+    list.BorderSizePixel = 0
+    list.ScrollBarThickness = 2
+    list.ScrollBarImageColor3 = Theme.Green
+    list.CanvasSize = UDim2.new(0, 0, 0, 0)
+    list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    list.ZIndex = 4
+    Instance.new("UICorner", list).CornerRadius = UDim.new(0, 7)
+    local listPad = Instance.new("UIPadding", list)
+    listPad.PaddingTop = UDim.new(0, 5)
+    listPad.PaddingBottom = UDim.new(0, 5)
+    listPad.PaddingLeft = UDim.new(0, 5)
+    listPad.PaddingRight = UDim.new(0, 5)
+    local listLayout = Instance.new("UIListLayout", list)
+    listLayout.Padding = UDim.new(0, 4)
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local refresh, setOpen
+    local rows = {}
+
+    for i, preset in ipairs(SKYBOX_PRESETS) do
+        local row = Instance.new("TextButton", list)
+        row.Size = UDim2.new(1, 0, 0, 30)
+        row.LayoutOrder = i
+        row.BackgroundColor3 = Theme.BgRow
+        row.BackgroundTransparency = 0.25
+        row.Text = ""
+        row.AutoButtonColor = false
+        row.ZIndex = 5
+        Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+        attachFeel(row)
+
+        local mark = Instance.new("Frame", row)
+        mark.Size = UDim2.new(0, 3, 1, -12)
+        mark.Position = UDim2.new(0, 4, 0, 6)
+        mark.BackgroundColor3 = Theme.Green
+        mark.BackgroundTransparency = 1
+        mark.BorderSizePixel = 0
+        mark.ZIndex = 6
+        Instance.new("UICorner", mark).CornerRadius = UDim.new(1, 0)
+
+        local label = Instance.new("TextLabel", row)
+        label.Size = UDim2.new(1, -26, 1, 0)
+        label.Position = UDim2.new(0, 16, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = localization[currentLanguage][preset.labelKey] or preset.labelKey
+        label.TextColor3 = Theme.TextMain
+        label.TextSize = 12
+        label.Font = Enum.Font.Gotham
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.TextTransparency = 1
+        label.ZIndex = 6
+
+        row.MouseButton1Click:Connect(function()
+            PlayClick()
+            _G.skyboxIndex = i
+            if i > 1 and not _G.skyboxEnabled then
+                _G.skyboxEnabled = true
+                if setToggleVisual then pcall(setToggleVisual, "skyboxEnabled", true) end
+            end
+            pcall(skyboxApply)
+            refresh()
+            setOpen(false)
+        end)
+
+        rows[i] = { row = row, label = label, mark = mark }
+    end
+
+    local listHeight = math.min(#SKYBOX_PRESETS * 34 + 10, 192)
+
+    refresh = function()
+        local index = math.clamp(tonumber(_G.skyboxIndex) or 1, 1, #SKYBOX_PRESETS)
+        local preset = SKYBOX_PRESETS[index]
+        value.Text = localization[currentLanguage][preset.labelKey] or preset.labelKey
+        value.TextTransparency = _G.skyboxEnabled and 0 or 0.35
+        chevron.TextColor3 = _G.skyboxEnabled and Theme.Green or Theme.TextDim
+        for i, item in ipairs(rows) do
+            local rowPreset = SKYBOX_PRESETS[i]
+            item.label.Text = localization[currentLanguage][rowPreset.labelKey] or rowPreset.labelKey
+            item.mark.BackgroundTransparency = (i == index) and 0 or 1
+            item.label.TextColor3 = (i == index) and Theme.GreenBright or Theme.TextMain
+        end
+    end
+
+    local isOpen = false
+    setOpen = function(open, instant)
+        isOpen = open
+        local targetList = open and listHeight or 0
+        local targetTotal = 46 + (open and (listHeight + 8) or 0)
+        if instant then
+            wrapper.Size = UDim2.new(1, -16, 0, targetTotal)
+            list.Size = UDim2.new(1, -16, 0, targetList)
+            chevron.Rotation = open and 90 or 0
+        else
+            TweenService:Create(wrapper, TweenInfo.new(0.24, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, -16, 0, targetTotal)}):Play()
+            TweenService:Create(list, TweenInfo.new(0.24, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, -16, 0, targetList)}):Play()
+            TweenService:Create(chevron, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = open and 90 or 0}):Play()
+        end
+        for i, item in ipairs(rows) do
+            local target = open and 0 or 1
+            if instant then
+                item.label.TextTransparency = target
+            else
+                local delay = open and (i * 0.025) or 0
+                TweenService:Create(item.label, TweenInfo.new(open and 0.15 or 0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, delay), {TextTransparency = target}):Play()
+            end
+        end
+    end
+
+    header.MouseButton1Click:Connect(function()
+        PlayClick()
+        setOpen(not isOpen)
+    end)
+
+    refresh()
+    setOpen(false, true)
+    return refresh
+end
+
+local skyboxRefreshVisuals = nil
+
 worldContent = Instance.new("Frame", tabs.Visuals)
 worldContent.Size = UDim2.new(1, 0, 0, 0)
 worldContent.AutomaticSize = Enum.AutomaticSize.Y
@@ -2244,6 +3005,11 @@ createInnerSlider(espContent, "espTextSize", 8, 24, "espTextSize", 10)
 
 -- WORLD Content
 createInnerToggle(worldContent, "fullbrightEnabled", "fullbrightEnabled", 1)
+createAdvancedToggle(worldContent, "worldThirdPerson", "worldThirdPerson", 2, function(sub)
+    createInnerSlider(sub, "worldThirdPersonDist", 4, 40, "worldThirdPersonDist", 1)
+end)
+createInnerToggle(worldContent, "skyboxEnabled", "skyboxEnabled", 3)
+skyboxRefreshVisuals = createSkyboxDropdown(worldContent, 4)
 
 -- === ОСТАЛЬНЫЕ ВКЛАДКИ ===
 createAdvancedToggle(tabs.Combat, "antiRecoil", "antiRecoil", 1, function(sub)
@@ -3587,6 +4353,8 @@ _G.lockedTargetTime = 0
 
 local hvhSnapPart, hvhSnapPick = nil, 0
 
+local fakeRunTrack, fakeRunAnimId, fakeRunAnimator, fakeRunCharAnimator = nil, nil, nil, nil
+
 local function getHvhTarget()
     local myChar = LocalPlayer.Character
     local myHrp  = myChar and myChar:FindFirstChild("HumanoidRootPart")
@@ -4153,35 +4921,88 @@ RunService.RenderStepped:Connect(function(dt)
             local camPos = Camera.CFrame.Position
 
             -- === ВСЕГДА ДОВОДКА ===
-            -- Мягко подтягивает взгляд к цели, но курсор двигаешь свободно.
-            -- Сила доводки убрана: наведение полностью задаётся «Скоростью Аима»
-            -- (0 = почти снап, 100 = мягко/медленно). Jitter/Miss/FOV учтены выше.
-            local raw = math.clamp(_G.aimSmoothing / 100, 0, 1)
-            local assist
-            if raw <= 0.001 then
-                -- 0 = мгновенно (снап), как в HVH
-                assist = 1
-            else
-                -- Время перевода растёт с ползунком, а не наоборот:
-                -- 1% ≈ 0.03 с (почти снап), 20% ≈ 0.3 с, 50% ≈ 1.1 с, 100% ≈ 4 с.
-                local duration = 0.02 + (raw ^ 1.6) * 4.0
-                local step = dt or (1 / 60)
-                assist = 1 - math.exp(-(step / duration) * 3)
-                assist = math.clamp(assist, 0.004, 1)
+            -- Только доводка: аимбот подтягивает взгляд, но не захватывает цель.
+            -- 0 = заметная помощь (0.6 за кадр), 100 = едва заметная (0.12).
+            -- Курсор всегда можно увести — полного удержания нет.
+            local s = math.clamp(_G.aimSmoothing / 100, 0, 1)
+
+            -- Упреждение движения цели: при стрейфе прицел ведёт точку заранее,
+            -- иначе доводка отстаёт и «не догоняет» на ходу.
+            local leadPart = targetPart
+            if leadPart and leadPart.AssemblyLinearVelocity then
+                local lead = 0.05 + (1 - s) * 0.05
+                finalTargetPos = finalTargetPos + leadPart.AssemblyLinearVelocity * lead
             end
-            if _G.aimAssistMode == "Доводка" then
-                local fraw = math.clamp((_G.aimFollowSmoothing or 50) / 100, 0, 1)
-                assist = math.clamp(0.25 + (1 - fraw) * 0.45, 0.2, 0.7)
-            end  -- raw=0 → 1.0, raw=1 → 0.1
-            if priorityActive then assist = 1 end
-            local lookPoint = camPos + Camera.CFrame.LookVector * 200
-            currentAimPoint = lookPoint:Lerp(finalTargetPos, assist)
-            Camera.CFrame = CFrame.new(camPos, currentAimPoint)
+
+            -- Доводка считается в углах, а не в мировой точке: скорость поворота
+            -- ограничена, не зависит от дистанции и не дёргается при движении.
+            -- 0 — без сглаживания (снап), 100 — очень медленное ведение.
+            local curDir = Camera.CFrame.LookVector
+            local wantDir = finalTargetPos - camPos
+            if s <= 0.001 then
+                -- Ползунок в нуле: наведение без сглаживания.
+                Camera.CFrame = CFrame.new(camPos, finalTargetPos)
+            elseif wantDir.Magnitude > 0.01 then
+                -- 1% ≈ 610°/с, 20% ≈ 405°/с, 50% ≈ 163°/с, 100% ≈ 8°/с.
+                local maxDegPerSec = 8 + ((1 - s) ^ 2) * 620
+                if priorityActive then maxDegPerSec = maxDegPerSec * 1.3 end
+                wantDir = wantDir.Unit
+                local dot = math.clamp(curDir:Dot(wantDir), -1, 1)
+                local ang = math.acos(dot)
+                if ang > 0.0005 then
+                    local stepRad = math.rad(maxDegPerSec) * (dt or (1 / 60))
+                    local k = math.min(1, stepRad / ang)
+                    local newDir = curDir:Lerp(wantDir, k)
+                    if newDir.Magnitude > 0.01 then
+                        Camera.CFrame = CFrame.new(camPos, camPos + newDir.Unit)
+                    end
+                end
+            end
+            currentAimPoint = finalTargetPos
         else
             lockedTargetPart = nil
             lastTargetPlayer = nil
             _G.__lastAimZone = nil
             currentAimPoint = Camera.CFrame.Position + Camera.CFrame.LookVector * 50
+        end
+    end
+
+    -- === ФЕЙК-БЕГ ===
+    -- Пока персонаж стоит на земле, проигрывается анимация бега.
+    -- Анимация локальная: на экране видно, другим игрокам — нет,
+    -- так как клиентская анимация не реплицируется на сервер.
+    if _G.aaFakeRun ~= nil and fakeRunAnimator ~= fakeRunCharAnimator then
+        fakeRunTrack = nil
+        fakeRunAnimId = nil
+        fakeRunCharAnimator = fakeRunAnimator
+    end
+    local fchar = LocalPlayer.Character
+    local fhum = fchar and fchar:FindFirstChildOfClass("Humanoid")
+    local fanim = fhum and fhum:FindFirstChildOfClass("Animator")
+    fakeRunAnimator = fanim
+    if fhum and fanim then
+        -- Фейк-бег живёт только внутри анти-аима: выключили анти-аим — бег снимается.
+        local wantRun = _G.aaFakeRun and _G.hvhAntiAimEnabled and fhum.Health > 0
+            and fhum.MoveDirection.Magnitude < 0.15
+            and fhum.FloorMaterial ~= Enum.Material.Air
+            and not (fhum.SeatPart ~= nil or fhum.Sit)
+        if wantRun then
+            local id = (fhum.RigType == Enum.HumanoidRigType.R15)
+                and "rbxassetid://507767714" or "rbxassetid://180426354"
+            if not fakeRunTrack or fakeRunAnimId ~= id then
+                if fakeRunTrack then pcall(function() fakeRunTrack:Stop() end) end
+                local anim = Instance.new("Animation")
+                anim.AnimationId = id
+                fakeRunTrack = fanim:LoadAnimation(anim)
+                fakeRunTrack.Looped = true
+                fakeRunTrack.Priority = Enum.AnimationPriority.Movement
+                fakeRunAnimId = id
+            end
+            if not fakeRunTrack.IsPlaying then
+                pcall(function() fakeRunTrack:Play(0.15) end)
+            end
+        elseif fakeRunTrack and fakeRunTrack.IsPlaying then
+            pcall(function() fakeRunTrack:Stop(0.2) end)
         end
     end
 
@@ -4414,7 +5235,7 @@ end
 AimWarning = Instance.new("TextLabel", ScreenGui)
 AimWarning.Name = "AntiAimWarning"
 AimWarning.AnchorPoint = Vector2.new(1, 0)
-AimWarning.Position = UDim2.new(1, -12, 0, 12)
+AimWarning.Position = UDim2.new(1, -12, 0, 48)
 AimWarning.Size = UDim2.new(0, 230, 0, 28)
 AimWarning.BackgroundColor3 = Color3.fromRGB(60, 10, 10)
 AimWarning.BackgroundTransparency = 0.15
@@ -4429,8 +5250,8 @@ Instance.new("UICorner", AimWarning).CornerRadius = UDim.new(0, 6)
 -- Ватермарка справа: при включении анти-аима отъезжает и горит красным.
 Watermark = Instance.new("TextLabel", ScreenGui)
 Watermark.Name = "Watermark"
-Watermark.AnchorPoint = Vector2.new(1, 0.5)
-Watermark.Position = UDim2.new(1, -12, 0.5, -60)
+Watermark.AnchorPoint = Vector2.new(1, 0)
+Watermark.Position = UDim2.new(1, -12, 0, 12)
 Watermark.Size = UDim2.new(0, 220, 0, 28)
 Watermark.BackgroundColor3 = Color3.fromRGB(10, 20, 12)
 Watermark.BackgroundTransparency = 0.2
@@ -4450,17 +5271,12 @@ RunService.RenderStepped:Connect(function(dt)
             AimWarning.Text = localization[currentLanguage].antiAimWarning or "ANTI-AIM"
         end
         if Watermark then
-            if _G.hvhAntiAimEnabled then
-                Watermark.Text = localization[currentLanguage].antiAimWarning or "ANTI-AIM"
-                Watermark.Position = UDim2.new(1, -232, 0.5, -60)
-                Watermark.BackgroundColor3 = Color3.fromRGB(60, 10, 10)
-                Watermark.TextColor3 = Color3.fromRGB(255, 90, 90)
-            else
-                Watermark.Text = "IMPULSE V2"
-                Watermark.Position = UDim2.new(1, -12, 0.5, -60)
-                Watermark.BackgroundColor3 = Color3.fromRGB(10, 20, 12)
-                Watermark.TextColor3 = Theme.GreenBright
-            end
+            -- Водяной знак всегда один и на своём месте; анти-аим показывается
+            -- отдельной плашкой под ним, чтобы элементы не накладывались.
+            Watermark.Text = "IMPULSE V2"
+            Watermark.Position = UDim2.new(1, -12, 0, 12)
+            Watermark.BackgroundColor3 = Color3.fromRGB(10, 20, 12)
+            Watermark.TextColor3 = Theme.GreenBright
         end
         local char = LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -4702,15 +5518,17 @@ local function saveLighting()
     end
 end
 
-local function applyFullbright()
-    saveLighting()
+-- Установка значений без сохранения: вызывается каждые 0.1 с, пока свет включён.
+-- Игра и сторонние скрипты периодически возвращают свои значения Lighting,
+-- поэтому одного применения при включении мало.
+local function enforceFullbright()
     Lighting.Brightness = 2
     Lighting.ClockTime = 14
     Lighting.Ambient = Color3.fromRGB(150, 150, 150)
     Lighting.OutdoorAmbient = Color3.fromRGB(150, 150, 150)
     Lighting.GlobalShadows = false
     Lighting.ExposureCompensation = 0
-    
+
     for _, child in ipairs(Lighting:GetChildren()) do
         if child:IsA("Atmosphere") then
             child.Density = 0
@@ -4718,6 +5536,11 @@ local function applyFullbright()
             child.Offset = 0
         end
     end
+end
+
+local function applyFullbright()
+    saveLighting()
+    enforceFullbright()
 end
 
 local function disableFullbright()
@@ -4740,90 +5563,95 @@ end
 
 task.spawn(function()
     while task.wait(0.1) do
-        if _G.fullbrightEnabled and not fullbrightActive then
-            fullbrightActive = true
-            applyFullbright()
-        elseif not _G.fullbrightEnabled and fullbrightActive then
+        if _G.fullbrightEnabled then
+            if not fullbrightActive then
+                fullbrightActive = true
+                applyFullbright()
+            else
+                -- Держим свет всё время, пока функция включена.
+                enforceFullbright()
+            end
+        elseif fullbrightActive then
             fullbrightActive = false
             disableFullbright()
         end
     end
 end)
 
--- === МИР: ТУМАН, РОЗОВОЕ НЕБО, ЧАСТИЦЫ ===
-local defaultFogColor = Lighting.FogColor
-local defaultFogStart = Lighting.FogStart
-local defaultFogEnd = Lighting.FogEnd
-local defaultClock = Lighting.ClockTime
+-- === ТРЕТЬЕ ЛИЦО ===
+-- Собственное смещение камеры: работает и там, где игра разрешает только первый вид,
+-- потому что мы не просим игру переключить вид, а сами отодвигаем камеру назад
+-- вдоль её же направления взгляда (после обновления камеры игрой).
+local tpActive = false
+local tpRayParams = RaycastParams.new()
+tpRayParams.FilterType = Enum.RaycastFilterType.Exclude
 
-local pinkCC = Instance.new("ColorCorrectionEffect", Lighting)
-pinkCC.TintColor = Color3.fromRGB(255, 180, 220)
-pinkCC.Saturation = 0.1
-pinkCC.Enabled = false
-
-local pinkAtmo = Instance.new("Atmosphere", Lighting)
-pinkAtmo.Color = Color3.fromRGB(255, 160, 210)
-pinkAtmo.Density = 0.35
-pinkAtmo.Haze = 1.5
-pinkAtmo.Glare = 0.1
-pinkAtmo.Enabled = false
-
-local particlePart = Instance.new("Part")
-particlePart.Name = "LocalParticles"
-particlePart.Size = Vector3.new(1, 1, 1)
-particlePart.Transparency = 1
-particlePart.CanCollide = false
-particlePart.Anchored = true
-particlePart.Parent = workspace
-local particleEmitter = Instance.new("ParticleEmitter", particlePart)
-particleEmitter.Texture = "rbxassetid://243098098"
-particleEmitter.Color = ColorSequence.new(Color3.fromRGB(255, 150, 210))
-particleEmitter.Lifetime = NumberRange.new(2, 4)
-particleEmitter.Speed = NumberRange.new(2, 6)
-particleEmitter.SpreadAngle = Vector2.new(180, 180)
-particleEmitter.Transparency = NumberSequence.new(0.2)
-particleEmitter.Size = NumberSequence.new(1)
-particleEmitter.Rate = 0
-particleEmitter.Enabled = false
-
-RunService.RenderStepped:Connect(function()
-    pcall(function()
-        -- Ничего не включено и раньше не включалось — не трогаем Lighting вообще.
-        local skyAny = _G.fogEnabled or _G.pinkSkyEnabled or _G.particlesEnabled
-        if not skyAny and not _G.__skyApplied then return end
-        _G.__skyApplied = skyAny
-
-        if _G.fogEnabled then
-            Lighting.FogColor = Color3.fromRGB(120, 70, 160)
-            Lighting.FogStart = 0
-            Lighting.FogEnd = 600 - (_G.fogDensity or 50) * 5.5
-        else
-            Lighting.FogColor = defaultFogColor
-            Lighting.FogStart = defaultFogStart
-            Lighting.FogEnd = defaultFogEnd
+local function tpUpdate()
+    if not _G.worldThirdPerson then
+        if tpActive then
+            tpActive = false
+            local char = LocalPlayer and LocalPlayer.Character
+            if char then
+                for _, obj in ipairs(char:GetDescendants()) do
+                    if obj:IsA("BasePart") and obj.LocalTransparencyModifier ~= 0 then
+                        obj.LocalTransparencyModifier = 0
+                    end
+                end
+            end
         end
+        return
+    end
 
-        pinkCC.Enabled = _G.pinkSkyEnabled
-        pinkAtmo.Enabled = _G.pinkSkyEnabled
-        if _G.pinkSkyEnabled then
-            Lighting.ClockTime = 17.2
-        else
-            Lighting.ClockTime = defaultClock
-        end
+    local cam = workspace.CurrentCamera
+    local char = LocalPlayer and LocalPlayer.Character
+    local head = char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Head"))
+    if not cam or not head then return end
+    if head.Parent ~= char then head = char:FindFirstChild("HumanoidRootPart") or head end
+    if not head or not head.Parent then return end
 
-        if _G.particlesEnabled then
-            local char = LocalPlayer.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then particlePart.Position = hrp.Position + Vector3.new(0, 8, 0) end
-            particleEmitter.Rate = (_G.particleDensity or 50) * 0.6
-            local sz = 0.5 + ((_G.particleSize or 50) / 100) * 2.5
-            particleEmitter.Size = NumberSequence.new(sz)
-            particleEmitter.Enabled = true
-        else
-            particleEmitter.Enabled = false
-            particleEmitter.Rate = 0
+    tpActive = true
+    local dist = tonumber(_G.worldThirdPersonDist) or 12
+    local look = cam.CFrame.LookVector
+    local origin = head.Position + Vector3.new(0, 1.2, 0)
+    local back = -look
+
+    tpRayParams.FilterDescendantsInstances = { char }
+    local hit = workspace:Raycast(origin, back * (dist + 0.8), tpRayParams)
+    local final = dist
+    if hit then
+        final = math.max(1.2, (hit.Position - origin).Magnitude - 0.4)
+    end
+
+    cam.CFrame = CFrame.lookAt(origin + back * final, origin)
+
+    -- В играх с жёстким первым видом персонаж скрыт: показываем его обратно.
+    for _, obj in ipairs(char:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.LocalTransparencyModifier ~= 0 then
+            obj.LocalTransparencyModifier = 0
         end
-    end)
+    end
+end
+
+pcall(function()
+    RunService:UnbindFromRenderStep("ImpulseThirdPerson")
+    RunService:BindToRenderStep("ImpulseThirdPerson", Enum.RenderPriority.Last.Value - 1, tpUpdate)
+end)
+
+-- Небо ставится раз в 0.5 с: этого хватает, и загрузка текстур не сбивается.
+task.spawn(function()
+    local applied = false
+    while task.wait(0.5) do
+        local index = math.clamp(tonumber(_G.skyboxIndex) or 1, 1, #SKYBOX_PRESETS)
+        local want = _G.skyboxEnabled and index > 1
+        if want then
+            pcall(skyboxApply)
+            applied = true
+        elseif applied then
+            pcall(skyboxApply, true)
+            applied = false
+        end
+        if skyboxRefreshVisuals then pcall(skyboxRefreshVisuals) end
+    end
 end)
 
 -- === DEBUG-КАМЕРА (только камера, персонаж НЕ трогается) ===
